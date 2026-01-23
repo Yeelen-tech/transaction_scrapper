@@ -31,7 +31,6 @@ class TransactionDashboard extends StatefulWidget {
 }
 
 class _TransactionDashboardState extends State<TransactionDashboard> {
-
   String formatDate(DateTime date) {
     return "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}";
   }
@@ -53,13 +52,14 @@ class _TransactionDashboardState extends State<TransactionDashboard> {
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard Transactions'), elevation: 0),
       body: Consumer<DashboardViewmodel>(
-        builder: (_, vm, _) {
-          final transactions = vm.transactions;
-          final totalEntrees = vm.totalEntrees;
-          final totalSorties = vm.totalSorties;
+        builder: (_, vm, __) {
           if (vm.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
+          final transactions = vm.transactions;
+          final totalEntrees = vm.totalEntrees;
+          final totalSorties = vm.totalSorties;
+          
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(

@@ -6,11 +6,22 @@ class DashboardViewmodel extends ChangeNotifier {
   final ScrappingService scrappingService = ScrappingService();
   List<Transaction> transactions = [];
   bool isLoading = true;
+  String? errorMessage;
 
-  void getTransactions() async {
-    transactions = await scrappingService.readTransactions();
-    isLoading = false;
+  Future<void> getTransactions() async {
+    isLoading = true;
+    errorMessage = null;
     notifyListeners();
+    
+    try {
+      transactions = await scrappingService.readTransactions();
+    } catch (e) {
+      errorMessage = 'Erreur: $e';
+      transactions = [];
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
 
   double get totalEntrees {

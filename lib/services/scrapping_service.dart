@@ -15,30 +15,48 @@ class ScrappingService {
 
   Future<List<Transaction>> readTransactions() async {
     await ScrappingService.requestSmsPermissions();
-    // Récupérer le timestamp de minuit aujourd'hui
+
+    // Définir la période d'aujourd'hui
     DateTime now = DateTime.now();
-    DateTime todayStart = DateTime(now.year, now.month, now.day);
-    int timestamp = todayStart.millisecondsSinceEpoch;
+    DateTime todayStart = DateTime(now.year, now.month, now.day, 0, 0, 0);
+    DateTime todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
 
-    final messages = await query.querySms(
-      start: timestamp, // Filtre les messages après ce timestamp
-    );
+    try {
+      SmsQuery query = SmsQuery();
 
-    List<Transaction> transactions = [];
+      // Récupérer les messages récents 
+      final allMessages = await query.querySms(
+        kinds: [SmsQueryKind.inbox],
+        count: 500,
+      );
 
-    for (var msg in messages) {
-      if (msg.address?.toLowerCase().contains('orangemoney') ?? false) {
-        final transaction = _parseTransaction(msg);
+      // Filtrer les messages d'aujourd'hui
+      final todayMessages = allMessages.where((msg) {
+        if (msg.date == null) return false;
+
+        return msg.date!.isAfter(todayStart) &&
+            msg.date!.isBefore(todayEnd.add(Duration(seconds: 1)));
+      }).toList();
+
+      print('Messages trouvés aujourd\'hui: ${todayMessages.length}');
+
+      // Convertir en transactions
+      List<Transaction> transactions = [];
+      for (var message in todayMessages) {
+        Transaction? transaction = _parseMessageToTransaction(message);
         if (transaction != null) {
           transactions.add(transaction);
         }
       }
-    }
 
-    return transactions;
+      return transactions;
+    } catch (e) {
+      print('Erreur lors de la lecture des SMS: $e');
+      return [];
+    }
   }
 
-  static Transaction? _parseTransaction(SmsMessage msg) {
+  static Transaction? _parseMessageToTransaction(SmsMessage msg) {
     final body = msg.body?.toLowerCase() ?? '';
 
     if (!body.contains('fcfa') && !body.contains('montant')) return null;
