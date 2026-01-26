@@ -9,7 +9,7 @@ class MoovScrappingService {
     await PermissionService.requestSmsPermission();
 
     // Définir la période d'aujourd'hui
-    DateTime now = DateTime.now();
+    // DateTime now = DateTime.now();
     // DateTime todayStart = DateTime(now.year, now.month, now.day, 0, 0, 0);
     // DateTime todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
 
