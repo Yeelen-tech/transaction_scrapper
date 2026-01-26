@@ -52,14 +52,14 @@ class _TransactionDashboardState extends State<TransactionDashboard> {
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard Transactions'), elevation: 0),
       body: Consumer<DashboardViewmodel>(
-        builder: (_, vm, __) {
+        builder: (_, vm, _) {
           if (vm.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
           final transactions = vm.transactions;
           final totalEntrees = vm.totalEntrees;
           final totalSorties = vm.totalSorties;
-          
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
