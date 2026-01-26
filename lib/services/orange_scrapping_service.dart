@@ -11,8 +11,8 @@ class OrangeScrappingService {
 
     // Définir la période d'aujourd'hui
     DateTime now = DateTime.now();
-    DateTime todayStart = DateTime(now.year, now.month, now.day, 0, 0, 0);
-    DateTime todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
+    // DateTime todayStart = DateTime(now.year, now.month, now.day, 0, 0, 0);
+    // DateTime todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
 
     try {
       SmsQuery query = SmsQuery();
@@ -35,7 +35,6 @@ class OrangeScrappingService {
 
       return orangeTransactions;
     } catch (e) {
-      print('Erreur lors de la lecture des SMS: $e');
       return [];
     }
   }
