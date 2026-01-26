@@ -16,32 +16,24 @@ class MoovScrappingService {
     try {
       SmsQuery query = SmsQuery();
 
-      // Récupérer les messages récents
-      final allMessages = await query.querySms(
+      // Récupérer les messages Moov Money
+      final moovMessages = await query.querySms(
         kinds: [SmsQueryKind.inbox],
         count: 500,
+        address: "Moov Money",
       );
 
-      // Filtrer les messages d'aujourd'hui
-      final todayMessages = allMessages.where((msg) {
-        if (msg.date == null) return false;
-
-        return msg.date!.isAfter(todayStart) &&
-            msg.date!.isBefore(todayEnd.add(Duration(seconds: 1)));
-      }).toList();
-
-      print('Messages trouvés aujourd\'hui: ${todayMessages.length}');
-
       // Convertir en transactions
-      List<Transaction> orangeTransactions = [];
-      for (var message in todayMessages) {
+      List<Transaction> moovTransactions = [];
+
+      for (var message in moovMessages) {
         Transaction? transaction = _parseMessageToTransaction(message);
         if (transaction != null) {
-          orangeTransactions.add(transaction);
+          moovTransactions.add(transaction);
         }
       }
 
-      return orangeTransactions;
+      return moovTransactions;
     } catch (e) {
       print('Erreur lors de la lecture des SMS: $e');
       return [];
@@ -49,25 +41,28 @@ class MoovScrappingService {
   }
 
   static Transaction? _parseMessageToTransaction(SmsMessage msg) {
-    final body = msg.body?.toLowerCase() ?? '';
+    final body = msg.body ?? '';
+    final bodyLower = body.toLowerCase();
 
-    if (!body.contains('fcfa') && !body.contains('montant')) return null;
+    if (!bodyLower.contains('fcfa')) return null;
 
-    final montantRegex = RegExp(r'(\d+[\s,.]?\d*)\s*fcfa');
+    // Format: "Vous avez recu 1 010,00 FCFA de Arnold ouedraogo"
+    final montantRegex = RegExp(
+      r'(\d+\s\d+,\d{2})\s*fcfa',
+      caseSensitive: false,
+    );
     final match = montantRegex.firstMatch(body);
 
     if (match == null) return null;
 
-    final montantStr = match.group(1)?.replaceAll(RegExp(r'[\s,]'), '') ?? '0';
+    final montantStr = match.group(1)!.replaceAll(' ', '').replaceAll(',', '.');
     final montant = double.tryParse(montantStr) ?? 0;
 
-    final isReceived =
-        body.contains('reçu') ||
-        body.contains('recu') ||
-        body.contains('crédit');
+    if (montant == 0) return null;
 
+    final isReceived = bodyLower.contains('vous avez recu');
     final date = msg.date ?? DateTime.now();
-    final contactName = _extractContactNameFromMoov(body, isReceived);
+    final contactName = _extractContactName(body);
 
     return Transaction(
       name: contactName,
@@ -77,22 +72,12 @@ class MoovScrappingService {
     );
   }
 
-  static String _extractContactNameFromMoov(String body, bool isReceived) {
-    final RegExp nomPattern;
-
-    if (isReceived) {
-      // Pour les réceptions: "de [Nom]"
-      nomPattern = RegExp(
-        r'(?:du\s\d{8}\b)\s+([A-Za-zÀ-ÿ\s]+?)(?:\s+(?:Numero|Numéro|Tel|N°|Date|\n)|$)',
-        caseSensitive: false,
-      );
-    } else {
-      // Pour les envois: "à [Nom]"
-      nomPattern = RegExp(
-        r'(?:à|a|to|vers)\s+([A-Za-zÀ-ÿ\s]+?)(?:\s+(?:Numero|Numéro|Tel|N°|Date|\n)|$)',
-        caseSensitive: false,
-      );
-    }
+  static String _extractContactName(String body) {
+    // Format: "de Arnold ouedraogo"
+    final nomPattern = RegExp(
+      r'de\s+([A-Za-zÀ-ÿ\s]+?)\s*Numero',
+      caseSensitive: false,
+    );
 
     final match = nomPattern.firstMatch(body);
     if (match != null) {
