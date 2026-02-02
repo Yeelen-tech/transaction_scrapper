@@ -56,111 +56,118 @@ class _TransactionDashboardState extends State<TransactionDashboard> {
           if (vm.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          final transactions = vm.transactions;
+          final transactions = vm.filteredTransactions;
           final totalEntrees = vm.totalEntrees;
-          final totalSorties = vm.totalSorties;
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Card(
-                        elevation: 3,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            gradient: LinearGradient(
-                              colors: [Colors.green[400]!, Colors.green[600]!],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(
-                                Icons.arrow_downward,
-                                color: Colors.white,
-                                size: 30,
-                              ),
-                              const SizedBox(height: 12),
-                              const Text(
-                                'Total Entrées',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                formatMontant(totalEntrees),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                Card(
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      gradient: LinearGradient(
+                        colors: [Colors.green[400]!, Colors.green[600]!],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Card(
-                        elevation: 3,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.arrow_downward,
+                          color: Colors.white,
+                          size: 30,
                         ),
-                        child: Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            gradient: LinearGradient(
-                              colors: [Colors.red[400]!, Colors.red[600]!],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(
-                                Icons.arrow_upward,
-                                color: Colors.white,
-                                size: 30,
-                              ),
-                              const SizedBox(height: 12),
-                              const Text(
-                                'Total Sorties',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                formatMontant(totalSorties),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Total Entrées',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
                           ),
                         ),
-                      ),
+                        const SizedBox(height: 8),
+                        Text(
+                          formatMontant(totalEntrees),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      FilterButton(
+                        text: "Aujourd'hui",
+                        onPressed: () => vm.setFilter(FilterPeriod.today),
+                        isSelected: vm.activeFilter == FilterPeriod.today,
+                      ),
+                      FilterButton(
+                        text: "Cette semaine",
+                        onPressed: () => vm.setFilter(FilterPeriod.thisWeek),
+                        isSelected: vm.activeFilter == FilterPeriod.thisWeek,
+                      ),
+                      FilterButton(
+                        text: "Ce mois",
+                        onPressed: () => vm.setFilter(FilterPeriod.thisMonth),
+                        isSelected: vm.activeFilter == FilterPeriod.thisMonth,
+                      ),
+                      FilterButton(
+                        text: "Cette année",
+                        onPressed: () => vm.setFilter(FilterPeriod.thisYear),
+                        isSelected: vm.activeFilter == FilterPeriod.thisYear,
+                      ),
+                      FilterButton(
+                        text: "Tout",
+                        onPressed: () => vm.setFilter(FilterPeriod.all),
+                        isSelected: vm.activeFilter == FilterPeriod.all,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      FilterButton(
+                        text: "Orange",
+                        onPressed: () => vm.setOperatorFilter(OperatorFilter.orange),
+                        isSelected: vm.activeOperatorFilter == OperatorFilter.orange,
+                      ),
+                      FilterButton(
+                        text: "Moov",
+                        onPressed: () => vm.setOperatorFilter(OperatorFilter.moov),
+                        isSelected: vm.activeOperatorFilter == OperatorFilter.moov,
+                      ),
+                      FilterButton(
+                        text: "Telecel",
+                        onPressed: () => vm.setOperatorFilter(OperatorFilter.telecel),
+                        isSelected: vm.activeOperatorFilter == OperatorFilter.telecel,
+                      ),
+                      FilterButton(
+                        text: "Tout",
+                        onPressed: () => vm.setOperatorFilter(OperatorFilter.all),
+                        isSelected: vm.activeOperatorFilter == OperatorFilter.all,
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 24),
                 const Text(
@@ -186,16 +193,10 @@ class _TransactionDashboardState extends State<TransactionDashboard> {
                           vertical: 8,
                         ),
                         leading: CircleAvatar(
-                          backgroundColor: transaction.isIncome
-                              ? Colors.green[100]
-                              : Colors.red[100],
+                          backgroundColor: Colors.green[100],
                           child: Icon(
-                            transaction.isIncome
-                                ? Icons.arrow_downward
-                                : Icons.arrow_upward,
-                            color: transaction.isIncome
-                                ? Colors.green[700]
-                                : Colors.red[700],
+                            Icons.arrow_downward,
+                            color: Colors.green[700],
                           ),
                         ),
                         title: Text(
@@ -205,22 +206,26 @@ class _TransactionDashboardState extends State<TransactionDashboard> {
                             fontSize: 16,
                           ),
                         ),
-                        subtitle: Text(
-                          formatDate(transaction.date),
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 13,
-                          ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(formatDate(transaction.date)),
+                            Text(transaction.phoneNumber),
+                          ],
                         ),
-                        trailing: Text(
-                          "${transaction.isIncome ? '+' : '-'} ${formatMontant(transaction.amount)}",
-                          style: TextStyle(
-                            color: transaction.isIncome
-                                ? Colors.green[700]
-                                : Colors.red[700],
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
+                        trailing: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              "+ ${formatMontant(transaction.amount)}",
+                              style: TextStyle(
+                                color: Colors.green[700],
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                            Text(transaction.operator, style: const TextStyle(fontSize: 12)),
+                          ],
                         ),
                       ),
                     );
@@ -230,6 +235,39 @@ class _TransactionDashboardState extends State<TransactionDashboard> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class FilterButton extends StatelessWidget {
+  final String text;
+  final VoidCallback onPressed;
+  final bool isSelected;
+
+  const FilterButton({
+    Key? key,
+    required this.text,
+    required this.onPressed,
+    this.isSelected = false,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isSelected ? Colors.blue : Colors.grey[300],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(color: isSelected ? Colors.white : Colors.black),
+        ),
       ),
     );
   }

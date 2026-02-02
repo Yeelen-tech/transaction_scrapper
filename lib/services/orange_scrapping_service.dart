@@ -9,22 +9,15 @@ class OrangeScrappingService {
   static Future<List<Transaction>> readTransactions() async {
     await PermissionService.requestSmsPermission();
 
-    // Définir la période d'aujourd'hui
-    // DateTime now = DateTime.now();
-    // DateTime todayStart = DateTime(now.year, now.month, now.day, 0, 0, 0);
-    // DateTime todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
-
     try {
       SmsQuery query = SmsQuery();
 
-      // Récupérer les messages Orange Money
       final orangeMessages = await query.querySms(
         kinds: [SmsQueryKind.inbox],
         count: 500,
         address: "OrangeMoney",
       );
 
-      // Convertir en transactions
       List<Transaction> orangeTransactions = [];
       for (var message in orangeMessages) {
         Transaction? transaction = _parseMessageToTransaction(message);
@@ -45,11 +38,7 @@ class OrangeScrappingService {
 
     if (!bodyLower.contains('fcfa')) return null;
 
-    // Format: "Vous avez recu 1,000.00 FCFA du 66978384,NESSAN"
-    final montantRegex = RegExp(
-      r'(\d+,\d+\.\d{2})\s*fcfa',
-      caseSensitive: false,
-    );
+    final montantRegex = RegExp(r'(\d+,\d+\.\d{2})\s*fcfa', caseSensitive: false,);
     final match = montantRegex.firstMatch(body);
 
     if (match == null) return null;
@@ -61,25 +50,41 @@ class OrangeScrappingService {
 
     final isReceived = bodyLower.contains('vous avez recu');
     final date = msg.date ?? DateTime.now();
-    final contactName = _extractContactName(body);
+    
+    final fromInfo = _extractFromInfo(body);
 
     return Transaction(
-      name: contactName,
+      name: fromInfo['name']!,
       date: date,
       amount: montant,
       isIncome: isReceived,
+      operator: 'Orange',
+      phoneNumber: fromInfo['phone']!,
+      transId: _extractTransId(body),
     );
   }
 
-  static String _extractContactName(String body) {
-    // Format: "du 66978384,NESSAN"
-    final nomPattern = RegExp(r'du\s+\d{8},([^.]+)', caseSensitive: false);
-
-    final match = nomPattern.firstMatch(body);
+  static Map<String, String> _extractFromInfo(String body) {
+    final fromPattern = RegExp(r'du\s+(\d{8}),([^,]+)');
+    final match = fromPattern.firstMatch(body);
     if (match != null) {
-      return match.group(1)!.trim();
+      return {
+        'phone': match.group(1)!,
+        'name': match.group(2)!,
+      };
     }
+    return {
+      'phone': 'Inconnu',
+      'name': 'Inconnu',
+    };
+  }
 
-    return 'Contact inconnu';
+  static String _extractTransId(String body) {
+    final transIdPattern = RegExp(r'trans\s*id:\s*(\d+)');
+    final match = transIdPattern.firstMatch(body);
+    if (match != null) {
+      return match.group(1)!;
+    }
+    return 'Inconnu';
   }
 }

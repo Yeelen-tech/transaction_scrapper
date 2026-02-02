@@ -8,11 +8,6 @@ class MoovScrappingService {
   static Future<List<Transaction>> readTransactions() async {
     await PermissionService.requestSmsPermission();
 
-    // Définir la période d'aujourd'hui
-    // DateTime now = DateTime.now();
-    // DateTime todayStart = DateTime(now.year, now.month, now.day, 0, 0, 0);
-    // DateTime todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
-
     try {
       SmsQuery query = SmsQuery();
 
@@ -46,10 +41,7 @@ class MoovScrappingService {
     if (!bodyLower.contains('fcfa')) return null;
 
     // Format: "Vous avez recu 1 010,00 FCFA de Arnold ouedraogo"
-    final montantRegex = RegExp(
-      r'(\d+\s\d+,\d{2})\s*fcfa',
-      caseSensitive: false,
-    );
+    final montantRegex = RegExp(r'(\d+\s\d+,\d{2})\s*fcfa', caseSensitive: false,);
     final match = montantRegex.firstMatch(body);
 
     if (match == null) return null;
@@ -61,28 +53,40 @@ class MoovScrappingService {
 
     final isReceived = bodyLower.contains('vous avez recu');
     final date = msg.date ?? DateTime.now();
-    final contactName = _extractContactName(body);
+    final fromInfo = _extractFromInfo(body);
 
     return Transaction(
-      name: contactName,
+      name: fromInfo['name']!,
       date: date,
       amount: montant,
       isIncome: isReceived,
+      operator: 'Moov',
+      phoneNumber: fromInfo['phone']!,
+      transId: _extractTransId(body),
     );
   }
 
-  static String _extractContactName(String body) {
-    // Format: "de Arnold ouedraogo"
-    final nomPattern = RegExp(
-      r'de\s+([A-Za-zÀ-ÿ\s]+?)\s*Numero',
-      caseSensitive: false,
-    );
-
-    final match = nomPattern.firstMatch(body);
+  static Map<String, String> _extractFromInfo(String body) {
+    final fromPattern = RegExp(r'de\s+(.+)\s+Numero:\s+(\d+)');
+    final match = fromPattern.firstMatch(body);
     if (match != null) {
-      return match.group(1)!.trim();
+      return {
+        'name': match.group(1)!,
+        'phone': match.group(2)!,
+      };
     }
+    return {
+      'name': 'Inconnu',
+      'phone': 'Inconnu',
+    };
+  }
 
-    return 'Contact inconnu';
+  static String _extractTransId(String body) {
+    final transIdPattern = RegExp(r'trans id:\s*(\d+)');
+    final match = transIdPattern.firstMatch(body);
+    if (match != null) {
+      return match.group(1)!;
+    }
+    return 'Inconnu';
   }
 }
