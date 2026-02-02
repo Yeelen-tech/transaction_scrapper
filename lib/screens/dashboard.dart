@@ -224,7 +224,7 @@ class _TransactionDashboardState extends State<TransactionDashboard> {
                                 fontSize: 15,
                               ),
                             ),
-                            Text(transaction.operator, style: const TextStyle(fontSize: 12)),
+                            Text(transaction.operator.name, style: const TextStyle(fontSize: 12)),
                           ],
                         ),
                       ),

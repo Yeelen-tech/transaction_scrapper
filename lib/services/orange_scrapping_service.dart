@@ -1,5 +1,6 @@
 import 'dart:core';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
+import 'package:transaction_scraper/models/operators.dart';
 import 'package:transaction_scraper/services/permission_service.dart';
 import '../models/transaction.dart';
 
@@ -38,7 +39,7 @@ class OrangeScrappingService {
 
     if (!bodyLower.contains('fcfa')) return null;
 
-    final montantRegex = RegExp(r'(\d+,\d+\.\d{2})\s*fcfa', caseSensitive: false,);
+    final montantRegex = RegExp(r'([\d,]+\.\d{2})\s*fcfa', caseSensitive: false);
     final match = montantRegex.firstMatch(body);
 
     if (match == null) return null;
@@ -50,7 +51,7 @@ class OrangeScrappingService {
 
     final isReceived = bodyLower.contains('vous avez recu');
     final date = msg.date ?? DateTime.now();
-    
+
     final fromInfo = _extractFromInfo(body);
 
     return Transaction(
@@ -58,19 +59,20 @@ class OrangeScrappingService {
       date: date,
       amount: montant,
       isIncome: isReceived,
-      operator: 'Orange',
+      operator: Operators.orange,
       phoneNumber: fromInfo['phone']!,
       transId: _extractTransId(body),
     );
   }
 
   static Map<String, String> _extractFromInfo(String body) {
-    final fromPattern = RegExp(r'du\s+(\d{8}),([^,]+)');
+    // Handles "du 57833104,RAYENDE..." and "du 66978384,NESSAN"
+    final fromPattern = RegExp(r'du\s+(\d+),(.+?)(?=\.\s*Le solde|$)');
     final match = fromPattern.firstMatch(body);
     if (match != null) {
       return {
-        'phone': match.group(1)!,
-        'name': match.group(2)!,
+        'phone': match.group(1)!.trim(),
+        'name': match.group(2)!.trim(),
       };
     }
     return {
@@ -80,10 +82,16 @@ class OrangeScrappingService {
   }
 
   static String _extractTransId(String body) {
-    final transIdPattern = RegExp(r'trans\s*id:\s*(\d+)');
+    // Handles "Trans ID: PP260131.2058.45306212." and "trans id: 123456789"
+    final transIdPattern = RegExp(r'trans id:\s*([\w\.]+)', caseSensitive: false);
     final match = transIdPattern.firstMatch(body);
     if (match != null) {
-      return match.group(1)!;
+      String transId = match.group(1)!.trim();
+      // Remove trailing dot if present
+      if (transId.endsWith('.')) {
+        transId = transId.substring(0, transId.length - 1);
+      }
+      return transId;
     }
     return 'Inconnu';
   }

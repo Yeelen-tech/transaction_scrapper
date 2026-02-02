@@ -1,5 +1,6 @@
 
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
+import 'package:transaction_scraper/models/operators.dart';
 import 'package:transaction_scraper/models/transaction.dart';
 import 'package:transaction_scraper/services/permission_service.dart';
 
@@ -72,7 +73,7 @@ class TelecelScrappingService {
       date: msg.date ?? DateTime.now(),
       amount: amount,
       isIncome: isReceived,
-      operator: 'Telecel',
+      operator: Operators.telecel,
       phoneNumber: phoneNumber,
       transId: transId,
     );
