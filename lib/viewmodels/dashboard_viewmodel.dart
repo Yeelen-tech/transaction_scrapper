@@ -105,7 +105,7 @@ class DashboardViewmodel extends ChangeNotifier {
           break;
       }
       filteredTransactions = periodFiltered
-          .where((t) => t.operator.toLowerCase() == operatorToFilter)
+          .where((t) => t.operator.name.toLowerCase() == operatorToFilter)
           .toList();
     }
 

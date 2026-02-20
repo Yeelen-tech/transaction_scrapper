@@ -1,19 +1,22 @@
-class Transaction {
-  final String name;
-  final DateTime date;
-  final double amount;
-  final bool isIncome;
-  final String operator;
-  final String phoneNumber;
-  final String transId;
+import 'package:isar/isar.dart';
+import 'package:transaction_scraper/models/operators.dart';
 
-  Transaction({
-    required this.name,
-    required this.date,
-    required this.amount,
-    required this.isIncome,
-    required this.operator,
-    required this.phoneNumber,
-    required this.transId,
-  });
+part 'transaction.g.dart';
+
+@collection
+class Transaction {
+  Id id = Isar.autoIncrement;
+
+  @Index(unique: true)
+  late String transId;
+
+  late String name;
+  late DateTime date;
+  late double amount;
+  late bool isIncome;
+  
+  @enumerated
+  late Operators operator;
+  
+  late String phoneNumber;
 }

@@ -1,5 +1,6 @@
 
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
+import 'package:transaction_scraper/models/operators.dart';
 import 'package:transaction_scraper/models/transaction.dart';
 import 'package:transaction_scraper/services/permission_service.dart';
 
@@ -67,14 +68,13 @@ class TelecelScrappingService {
     final transIdMatch = transIdRegex.firstMatch(body);
     final transId = transIdMatch?.group(1) ?? 'Inconnu';
 
-    return Transaction(
-      name: name,
-      date: msg.date ?? DateTime.now(),
-      amount: amount,
-      isIncome: isReceived,
-      operator: 'Telecel',
-      phoneNumber: phoneNumber,
-      transId: transId,
-    );
+    return Transaction()
+      ..name = name
+      ..date = msg.date ?? DateTime.now()
+      ..amount = amount
+      ..isIncome = isReceived
+      ..operator = Operators.telecel
+      ..phoneNumber = phoneNumber
+      ..transId = transId;
   }
 }
