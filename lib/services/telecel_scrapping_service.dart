@@ -68,14 +68,13 @@ class TelecelScrappingService {
     final transIdMatch = transIdRegex.firstMatch(body);
     final transId = transIdMatch?.group(1) ?? 'Inconnu';
 
-    return Transaction(
-      name: name,
-      date: msg.date ?? DateTime.now(),
-      amount: amount,
-      isIncome: isReceived,
-      operator: Operators.telecel,
-      phoneNumber: phoneNumber,
-      transId: transId,
-    );
+    return Transaction()
+      ..name = name
+      ..date = msg.date ?? DateTime.now()
+      ..amount = amount
+      ..isIncome = isReceived
+      ..operator = Operators.telecel
+      ..phoneNumber = phoneNumber
+      ..transId = transId;
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:transaction_scraper/screens/transaction_detail_screen.dart';
 import 'package:transaction_scraper/viewmodels/dashboard_viewmodel.dart';
 
 void main() {
@@ -227,6 +228,16 @@ class _TransactionDashboardState extends State<TransactionDashboard> {
                             Text(transaction.operator.name, style: const TextStyle(fontSize: 12)),
                           ],
                         ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TransactionDetailScreen(
+                                transaction: transaction,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     );
                   },
@@ -246,11 +257,11 @@ class FilterButton extends StatelessWidget {
   final bool isSelected;
 
   const FilterButton({
-    Key? key,
+    super.key,
     required this.text,
     required this.onPressed,
     this.isSelected = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

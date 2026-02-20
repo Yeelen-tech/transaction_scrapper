@@ -58,15 +58,14 @@ class MoovScrappingService {
     final date = msg.date ?? DateTime.now();
     final fromInfo = _extractFromInfo(body);
 
-    return Transaction(
-      name: fromInfo['name']!,
-      date: date,
-      amount: montant,
-      isIncome: isReceived,
-      operator: Operators.moov,
-      phoneNumber: fromInfo['phone']!,
-      transId: _extractTransId(body),
-    );
+    return Transaction()
+      ..name = fromInfo['name']!
+      ..date = date
+      ..amount = montant
+      ..isIncome = isReceived
+      ..operator = Operators.moov
+      ..phoneNumber = fromInfo['phone']!
+      ..transId = _extractTransId(body);
   }
 
   static Map<String, String> _extractFromInfo(String body) {
